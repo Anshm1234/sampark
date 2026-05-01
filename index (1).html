@@ -1,0 +1,769 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Sampark — Contact Vehicle Owner</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@600&display=swap" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+    <style>
+        :root {
+            --purple:        #3B0F7A;
+            --purple-mid:    #6D28D9;
+            --purple-light:  #EDE9FE;
+            --purple-xlight: #F4F2FF;
+            --yellow:        #FFD600;
+            --yellow-dark:   #E6C000;
+            --bg:            #F4F2FF;
+            --surface:       #FFFFFF;
+            --border:        rgba(74,29,150,0.08);
+            --border2:       rgba(74,29,150,0.16);
+            --text:          #1A0050;
+            --text2:         #6D28D9;
+            --text3:         #9067C6;
+            --green:         #16A34A;
+            --green-bg:      #DCFCE7;
+            --red:           #DC2626;
+            --radius:        20px;
+            --radius-sm:     14px;
+            --radius-xs:     10px;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: var(--bg);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+        }
+
+        .app {
+            width: 100%;
+            max-width: 430px;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            background: var(--bg);
+            position: relative;
+        }
+
+        /* ── HERO ── */
+        .hero {
+            background: var(--purple);
+            padding: 52px 20px 24px;
+            position: relative;
+            overflow: hidden;
+        }
+        .hero::before {
+            content: '';
+            position: absolute;
+            top: -80px; right: -80px;
+            width: 240px; height: 240px;
+            border-radius: 50%;
+            background: rgba(255,214,0,0.07);
+            pointer-events: none;
+        }
+        .hero::after {
+            content: '';
+            position: absolute;
+            bottom: -50px; left: -40px;
+            width: 160px; height: 160px;
+            border-radius: 50%;
+            background: rgba(255,255,255,0.03);
+            pointer-events: none;
+        }
+
+        .hero-top {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 24px;
+            position: relative; z-index: 1;
+        }
+        .brand { display: flex; align-items: center; gap: 10px; }
+        .brand-logo {
+            width: 36px; height: 36px;
+            background: var(--yellow);
+            border-radius: 11px;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 17px; font-weight: 900;
+            color: var(--purple);
+            letter-spacing: -1px;
+        }
+        .brand-name { font-size: 16px; font-weight: 800; color: #fff; letter-spacing: 1.5px; }
+        .brand-tag  { font-size: 9px; color: rgba(255,255,255,0.38); font-weight: 500; margin-top: 2px; letter-spacing: 0.4px; }
+
+        .live-pill {
+            display: flex; align-items: center; gap: 5px;
+            background: rgba(255,214,0,0.12);
+            border: 1px solid rgba(255,214,0,0.28);
+            border-radius: 20px;
+            padding: 5px 11px;
+            font-size: 10px; font-weight: 700;
+            color: var(--yellow);
+            letter-spacing: 1px;
+        }
+        .live-dot {
+            width: 6px; height: 6px; border-radius: 50%;
+            background: var(--yellow);
+            animation: blink 2s infinite;
+        }
+        @keyframes blink { 0%,100%{opacity:1} 50%{opacity:0.3} }
+
+        .car-label {
+            font-size: 10px; font-weight: 600;
+            color: rgba(255,255,255,0.38);
+            letter-spacing: 2px; text-transform: uppercase;
+            margin-bottom: 10px;
+            position: relative; z-index: 1;
+        }
+        .car-row {
+            display: flex; align-items: center; gap: 14px;
+            position: relative; z-index: 1;
+        }
+        .car-icon {
+            width: 58px; height: 58px;
+            background: rgba(255,255,255,0.08);
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 18px;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 28px;
+            flex-shrink: 0;
+        }
+        .car-name { font-size: 22px; font-weight: 800; color: #fff; line-height: 1.1; }
+        .plate-chip {
+            display: inline-flex; align-items: center; gap: 7px;
+            background: var(--yellow);
+            border-radius: 7px;
+            padding: 4px 11px;
+            margin-top: 7px;
+        }
+        .plate-chip .ring {
+            width: 7px; height: 7px; border-radius: 50%;
+            background: var(--green);
+            box-shadow: 0 0 0 2px rgba(22,163,74,0.3);
+        }
+        .plate-chip span {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 12px; font-weight: 600;
+            color: #0D0320; letter-spacing: 2.5px;
+        }
+
+        /* ── PRIVACY STRIP ── */
+        .privacy-strip {
+            background: rgba(0,0,0,0.18);
+            border-bottom: 1px solid rgba(255,255,255,0.05);
+            padding: 10px 20px;
+            display: flex; align-items: center; gap: 9px;
+            font-size: 11px; color: rgba(255,255,255,0.45);
+            font-weight: 500;
+        }
+        .lock-badge {
+            width: 20px; height: 20px; flex-shrink: 0;
+            background: rgba(255,214,0,0.15);
+            border-radius: 6px;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 10px;
+        }
+        .privacy-strip b { color: rgba(255,255,255,0.75); font-weight: 600; }
+
+        /* ── BODY ── */
+        .body { flex: 1; padding: 20px 16px; }
+
+        .sec-label {
+            font-size: 10px; font-weight: 700;
+            letter-spacing: 2px; text-transform: uppercase;
+            color: var(--text3);
+            margin-bottom: 12px; padding-left: 2px;
+        }
+
+        /* ── 2-COL CONTACT CARDS ── */
+        .contact-grid {
+            display: grid; grid-template-columns: 1fr 1fr;
+            gap: 10px; margin-bottom: 20px;
+        }
+        .contact-card {
+            background: var(--surface);
+            border-radius: var(--radius);
+            padding: 16px 14px 14px;
+            border: 1.5px solid var(--border);
+            cursor: pointer;
+            text-decoration: none;
+            display: flex; flex-direction: column; gap: 12px;
+            transition: border-color 0.15s, transform 0.12s;
+            -webkit-tap-highlight-color: transparent;
+        }
+        .contact-card:active { transform: scale(0.96); }
+        .contact-card.wa:active  { border-color: #16A34A; }
+        .contact-card.call:active { border-color: var(--purple-mid); }
+
+        .cc-icon {
+            width: 44px; height: 44px;
+            border-radius: 14px;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 20px;
+        }
+        .cc-icon.green  { background: var(--green-bg); }
+        .cc-icon.purple { background: var(--purple-light); }
+        .cc-title { font-size: 13px; font-weight: 700; color: var(--text); }
+        .cc-sub   { font-size: 11px; color: var(--text3); font-weight: 500; margin-top: 2px; }
+        .cc-arrow { font-size: 14px; color: #C4B5FD; margin-top: auto; }
+
+        /* ── LIST BUTTONS ── */
+        .list-actions { display: flex; flex-direction: column; gap: 8px; margin-bottom: 20px; }
+        .list-btn {
+            background: var(--surface);
+            border-radius: var(--radius-sm);
+            padding: 13px 14px;
+            border: 1.5px solid var(--border);
+            display: flex; align-items: center; gap: 12px;
+            cursor: pointer; width: 100%;
+            font-family: 'Inter', sans-serif;
+            transition: border-color 0.15s, transform 0.12s;
+        }
+        .list-btn:active { transform: scale(0.98); border-color: var(--border2); }
+        .lb-icon {
+            width: 40px; height: 40px; flex-shrink: 0;
+            border-radius: 13px;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 18px;
+        }
+        .lb-icon.loc   { background: #F0FDF4; }
+        .lb-icon.note  { background: var(--purple-light); }
+        .lb-icon.photo { background: #FFF7ED; }
+        .lb-icon.qr    { background: #F5F3FF; }
+        .lb-body  { flex: 1; text-align: left; }
+        .lb-title { font-size: 13px; font-weight: 700; color: var(--text); }
+        .lb-sub   { font-size: 11px; color: var(--text3); font-weight: 500; margin-top: 1px; }
+        .lb-chev  {
+            width: 24px; height: 24px;
+            background: var(--purple-xlight);
+            border-radius: 8px;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 13px; color: var(--text3);
+            transition: background 0.15s;
+        }
+
+        /* ── PANELS ── */
+        .panel {
+            background: var(--surface);
+            border: 1.5px solid var(--border2);
+            border-radius: var(--radius-sm);
+            margin-top: -4px;
+            margin-bottom: 8px;
+            overflow: hidden;
+            display: none;
+            animation: slideDown 0.18s ease;
+        }
+        .panel.open { display: block; }
+        @keyframes slideDown { from { opacity:0; transform:translateY(-6px) } to { opacity:1; transform:translateY(0) } }
+
+        .panel textarea {
+            width: 100%; padding: 14px 16px;
+            background: transparent; border: none; outline: none;
+            color: var(--text); font-family: 'Inter', sans-serif;
+            font-size: 14px; resize: none; min-height: 88px; line-height: 1.5;
+        }
+        .panel textarea::placeholder { color: var(--text3); }
+        .panel-foot {
+            display: flex; align-items: center; justify-content: space-between;
+            padding: 8px 12px;
+            border-top: 1px solid var(--border);
+        }
+        .char-c { font-size: 11px; color: var(--text3); }
+        .send-btn {
+            background: var(--purple);
+            color: #fff;
+            border: none; border-radius: 9px;
+            padding: 8px 16px;
+            font-size: 12px; font-weight: 700;
+            cursor: pointer; font-family: 'Inter', sans-serif;
+            transition: background 0.15s;
+        }
+        .send-btn:hover { background: #2d0860; }
+
+        /* photo drop */
+        .photo-drop {
+            margin: 14px;
+            border: 2px dashed var(--border2);
+            border-radius: 12px;
+            padding: 24px 16px; text-align: center;
+            cursor: pointer; transition: all 0.18s;
+        }
+        .photo-drop:hover { border-color: var(--purple-mid); background: var(--purple-xlight); }
+        .photo-drop input { display: none; }
+        .pdrop-icon { font-size: 30px; margin-bottom: 8px; }
+        .pdrop-lbl  { font-size: 13px; color: var(--text2); font-weight: 600; }
+        .pdrop-sub  { font-size: 11px; color: var(--text3); margin-top: 3px; }
+        #photo-preview { display: none; margin: 0 14px 14px; }
+        #photo-preview img { width: 100%; border-radius: 10px; border: 1px solid var(--border2); max-height: 180px; object-fit: cover; }
+        .photo-acts { display: flex; gap: 8px; margin-top: 8px; }
+        .photo-acts button {
+            flex: 1; padding: 9px; border-radius: 9px;
+            border: 1.5px solid var(--border2); background: transparent;
+            color: var(--text); font-family: 'Inter', sans-serif;
+            font-size: 12px; font-weight: 600; cursor: pointer;
+        }
+        .photo-acts .send-ph { background: var(--purple); color: #fff; border-color: var(--purple); }
+
+        /* QR */
+        .qr-wrap { padding: 20px; display: flex; flex-direction: column; align-items: center; gap: 12px; }
+        #qr-canvas { background: white; padding: 12px; border-radius: 12px; border: 1px solid var(--border); }
+        .qr-note { font-size: 11px; color: var(--text3); text-align: center; line-height: 1.6; }
+        .qr-url  {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 10px; color: var(--purple-mid);
+            background: var(--purple-xlight);
+            border: 1px solid var(--border2);
+            border-radius: 6px; padding: 6px 10px;
+            word-break: break-all; text-align: center;
+        }
+
+        /* ── SOS CARD ── */
+        .sos-card {
+            background: var(--purple);
+            border-radius: var(--radius);
+            padding: 18px 18px 16px;
+            display: flex; flex-direction: column; gap: 12px;
+            cursor: pointer;
+            border: 1.5px solid rgba(255,214,0,0.12);
+            transition: transform 0.12s;
+            margin-bottom: 4px;
+        }
+        .sos-card:active { transform: scale(0.98); }
+        .sos-top  { display: flex; align-items: center; gap: 12px; }
+        .sos-icon {
+            width: 44px; height: 44px; flex-shrink: 0;
+            background: rgba(239,68,68,0.15);
+            border: 1px solid rgba(239,68,68,0.22);
+            border-radius: 14px;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 22px;
+        }
+        .sos-title { font-size: 15px; font-weight: 800; color: #fff; }
+        .sos-sub   { font-size: 11px; color: rgba(255,255,255,0.45); margin-top: 2px; }
+        .sos-chips { display: flex; gap: 8px; }
+        .sos-chip {
+            background: rgba(255,255,255,0.08);
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 9px; padding: 6px 12px;
+            font-size: 11px; font-weight: 700; color: #fff;
+            display: flex; align-items: center; gap: 6px;
+        }
+        .chip-dot { width: 6px; height: 6px; border-radius: 50%; }
+        .chip-dot.police { background: #60A5FA; }
+        .chip-dot.amb    { background: #F87171; }
+
+        /* ── EMERGENCY VIEW ── */
+        #emergency-view {
+            display: none; flex-direction: column;
+            padding: 48px 16px 24px;
+        }
+        #emergency-view.active { display: flex; animation: fadeUp 0.22s ease; }
+        @keyframes fadeUp { from{opacity:0;transform:translateY(10px)} to{opacity:1;transform:translateY(0)} }
+
+        .sos-badge {
+            display: inline-flex; align-items: center; gap: 6px;
+            background: rgba(220,38,38,0.08);
+            border: 1px solid rgba(220,38,38,0.22);
+            border-radius: 100px; padding: 5px 14px;
+            font-size: 10px; font-weight: 700; letter-spacing: 2px;
+            color: var(--red); align-self: center; margin-bottom: 18px;
+        }
+        .sos-pulse { width: 6px; height: 6px; border-radius: 50%; background: var(--red); animation: blink 0.7s infinite; }
+
+        .sos-hd { text-align: center; margin-bottom: 28px; }
+        .sos-hd h2 { font-size: 28px; font-weight: 900; color: var(--text); margin-bottom: 6px; }
+        .sos-hd p  { font-size: 13px; color: var(--text3); font-weight: 500; }
+
+        .sos-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 14px; }
+        .sos-em-card {
+            background: var(--surface);
+            border: 1.5px solid var(--border);
+            border-radius: var(--radius);
+            padding: 22px 12px; text-align: center;
+            text-decoration: none; color: var(--text);
+            display: flex; flex-direction: column; align-items: center; gap: 6px;
+            transition: all 0.15s;
+        }
+        .sos-em-card:active { transform: scale(0.96); }
+        .sos-em-card.police:active { border-color: #3B82F6; background: #EFF6FF; }
+        .sos-em-card.amb:active    { border-color: var(--red); background: #FEF2F2; }
+        .s-emoji { font-size: 30px; }
+        .s-num   { font-family: 'JetBrains Mono', monospace; font-size: 24px; font-weight: 600; color: var(--text); }
+        .s-lbl   { font-size: 11px; color: var(--text3); font-weight: 500; }
+
+        .fam-btn {
+            background: var(--surface);
+            border: 1.5px solid rgba(22,163,74,0.2);
+            border-radius: var(--radius-sm);
+            padding: 15px 16px; margin-bottom: 12px;
+            display: flex; align-items: center; gap: 12px;
+            text-decoration: none; color: var(--text);
+            font-family: 'Inter', sans-serif; font-size: 14px; font-weight: 700;
+            transition: all 0.15s;
+        }
+        .fam-btn:active { background: #F0FDF4; border-color: var(--green); }
+        .fam-ic {
+            width: 42px; height: 42px; border-radius: 13px;
+            background: #DCFCE7;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 20px; flex-shrink: 0;
+        }
+        .fam-sub { font-size: 11px; color: var(--text3); font-weight: 500; margin-top: 2px; }
+
+        .back-btn {
+            width: 100%; padding: 14px;
+            border: 1.5px solid var(--border2);
+            border-radius: var(--radius-sm);
+            background: transparent;
+            color: var(--text3); font-family: 'Inter', sans-serif;
+            font-size: 13px; font-weight: 600; cursor: pointer;
+            transition: background 0.15s;
+        }
+        .back-btn:hover { background: var(--surface); }
+
+        /* ── ERROR ── */
+        .error-box {
+            margin: 48px 16px; padding: 28px;
+            border-radius: var(--radius);
+            background: #FEF2F2;
+            border: 1.5px solid rgba(220,38,38,0.18);
+            text-align: center; display: none;
+        }
+        .error-box h3 { color: var(--red); margin-bottom: 8px; font-size: 18px; }
+        .error-box p  { font-size: 13px; color: var(--text3); }
+
+        /* ── FOOTER ── */
+        footer {
+            padding: 16px; text-align: center;
+            font-size: 11px; color: var(--text3);
+            letter-spacing: 0.3px; font-weight: 500;
+        }
+        footer b { color: var(--purple-mid); }
+
+        /* ── DIVIDER ── */
+        .divider { height: 1px; background: var(--border); margin: 4px 0 20px; }
+    </style>
+</head>
+<body>
+<div class="app">
+
+    <div id="main-content">
+
+        <!-- HERO -->
+        <div class="hero">
+            <div class="hero-top">
+                <div class="brand">
+                    <div class="brand-logo">S</div>
+                    <div>
+                        <div class="brand-name">SAMPARK</div>
+                        <div class="brand-tag">Parking Tag System</div>
+                    </div>
+                </div>
+                <div class="live-pill"><div class="live-dot"></div>LIVE</div>
+            </div>
+            <div class="car-label">Registered Vehicle</div>
+            <div class="car-row">
+                <div class="car-icon" id="v-icon">🚗</div>
+                <div>
+                    <div class="car-name" id="v-name">Loading…</div>
+                    <div class="plate-chip">
+                        <div class="ring"></div>
+                        <span id="v-plate">••• •••</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- PRIVACY STRIP -->
+        <div class="privacy-strip">
+            <div class="lock-badge">🔒</div>
+            <span><b>Phone numbers masked</b> — contact routed securely via Sampark</span>
+        </div>
+
+        <!-- BODY -->
+        <div class="body">
+
+            <!-- Contact -->
+            <div class="sec-label">Contact Owner</div>
+            <div class="contact-grid">
+                <a id="btn-wa" href="#" class="contact-card wa">
+                    <div class="cc-icon green">💬</div>
+                    <div>
+                        <div class="cc-title">WhatsApp</div>
+                        <div class="cc-sub">Instant message</div>
+                    </div>
+                    <div class="cc-arrow">→</div>
+                </a>
+                <a id="btn-call" href="#" class="contact-card call">
+                    <div class="cc-icon purple">📞</div>
+                    <div>
+                        <div class="cc-title">Call Owner</div>
+                        <div class="cc-sub" id="masked-num">+91 ••••• •••---</div>
+                    </div>
+                    <div class="cc-arrow">→</div>
+                </a>
+            </div>
+
+            <div class="divider"></div>
+
+            <!-- More Actions -->
+            <div class="sec-label">More Actions</div>
+            <div class="list-actions">
+
+                <button onclick="sendLocation()" class="list-btn">
+                    <div class="lb-icon loc">📍</div>
+                    <div class="lb-body">
+                        <div class="lb-title">Share My Location</div>
+                        <div class="lb-sub">Send GPS coordinates via WhatsApp</div>
+                    </div>
+                    <div class="lb-chev">›</div>
+                </button>
+
+                <button onclick="togglePanel('msg-panel','msg-chev')" class="list-btn">
+                    <div class="lb-icon note">✏️</div>
+                    <div class="lb-body">
+                        <div class="lb-title">Leave a Note</div>
+                        <div class="lb-sub">Type a personal message</div>
+                    </div>
+                    <div class="lb-chev" id="msg-chev">›</div>
+                </button>
+            </div>
+
+            <!-- Message panel -->
+            <div class="panel" id="msg-panel">
+                <textarea id="msg-text" placeholder="e.g. You're blocking my gate, please move…" maxlength="300" oninput="document.getElementById('cnum').textContent=this.value.length"></textarea>
+                <div class="panel-foot">
+                    <span class="char-c"><span id="cnum">0</span>/300</span>
+                    <button class="send-btn" onclick="sendCustomMsg()">Send via WhatsApp →</button>
+                </div>
+            </div>
+
+            <div class="list-actions">
+                <button onclick="togglePanel('photo-panel','photo-chev')" class="list-btn">
+                    <div class="lb-icon photo">📸</div>
+                    <div class="lb-body">
+                        <div class="lb-title">Upload Photo</div>
+                        <div class="lb-sub">Show the parking situation</div>
+                    </div>
+                    <div class="lb-chev" id="photo-chev">›</div>
+                </button>
+            </div>
+
+            <!-- Photo panel -->
+            <div class="panel" id="photo-panel">
+                <div class="photo-drop" id="drop-zone" onclick="document.getElementById('file-input').click()">
+                    <input type="file" id="file-input" accept="image/*" capture="environment" onchange="handlePhoto(event)">
+                    <div class="pdrop-icon">📷</div>
+                    <div class="pdrop-lbl">Take photo or choose from gallery</div>
+                    <div class="pdrop-sub">JPG, PNG — up to 10 MB</div>
+                </div>
+                <div id="photo-preview">
+                    <img id="preview-img" src="" alt="Preview">
+                    <div class="photo-acts">
+                        <button onclick="clearPhoto()">✕ Remove</button>
+                        <button class="send-ph" onclick="sendPhotoWA()">Send via WhatsApp →</button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="list-actions">
+                <button onclick="togglePanel('qr-panel','qr-chev');generateQR()" class="list-btn">
+                    <div class="lb-icon qr">⬛</div>
+                    <div class="lb-body">
+                        <div class="lb-title">Show QR Code</div>
+                        <div class="lb-sub">Let others scan to contact owner</div>
+                    </div>
+                    <div class="lb-chev" id="qr-chev">›</div>
+                </button>
+            </div>
+
+            <!-- QR panel -->
+            <div class="panel" id="qr-panel">
+                <div class="qr-wrap">
+                    <div id="qr-canvas"></div>
+                    <div class="qr-url" id="qr-url-label">—</div>
+                    <div class="qr-note">Others can scan this QR to contact the owner.<br>Phone number stays hidden.</div>
+                </div>
+            </div>
+
+            <div class="divider"></div>
+
+            <!-- SOS -->
+            <div class="sos-card" onclick="toggleEmergency()">
+                <div class="sos-top">
+                    <div class="sos-icon">⚠️</div>
+                    <div>
+                        <div class="sos-title">Emergency / SOS</div>
+                        <div class="sos-sub">Tap to access emergency contacts</div>
+                    </div>
+                </div>
+                <div class="sos-chips">
+                    <div class="sos-chip"><div class="chip-dot police"></div>Police 112</div>
+                    <div class="sos-chip"><div class="chip-dot amb"></div>Ambulance 108</div>
+                </div>
+            </div>
+
+        </div><!-- /body -->
+
+        <footer>🔒 <b>Sampark</b> — Secure parking tag · Numbers masked for privacy</footer>
+    </div><!-- /main-content -->
+
+
+    <!-- EMERGENCY VIEW -->
+    <div id="emergency-view">
+        <div class="sos-badge"><span class="sos-pulse"></span>SOS ACTIVE</div>
+        <div class="sos-hd">
+            <h2>Need Help?</h2>
+            <p>Tap any option to connect immediately</p>
+        </div>
+        <div class="sos-grid">
+            <a href="tel:112" class="sos-em-card police">
+                <span class="s-emoji">🚓</span>
+                <span class="s-num">112</span>
+                <span class="s-lbl">Police</span>
+            </a>
+            <a href="tel:108" class="sos-em-card amb">
+                <span class="s-emoji">🚑</span>
+                <span class="s-num">108</span>
+                <span class="s-lbl">Ambulance</span>
+            </a>
+        </div>
+        <a id="btn-family" href="#" class="fam-btn">
+            <div class="fam-ic">👨‍👩‍👦</div>
+            <div class="lb-body">
+                <div class="lb-title">Emergency Contact</div>
+                <div class="fam-sub">Call registered family member</div>
+            </div>
+            <div style="margin-left:auto;color:var(--text3);font-size:18px;">›</div>
+        </a>
+        <button onclick="toggleEmergency()" class="back-btn">← Back to Contact Page</button>
+    </div>
+
+    <!-- ERROR -->
+    <div id="error-msg" class="error-box">
+        <h3>❌ Invalid QR Code</h3>
+        <p>Vehicle not found in the Sampark system.</p>
+    </div>
+
+</div><!-- /app -->
+
+<script>
+const vehicleDB = {
+    "swift":  { name:"Swift Dzire",        plate:"PB 10 AB 1234", phone:"919463003755", emergency:"917529045245", icon:"🚗" },
+    "city":   { name:"Honda City",          plate:"DL 3C XY 5678", phone:"917529045245", emergency:"919463003755", icon:"🚙" },
+    "bike":   { name:"Royal Enfield 350",   plate:"PB 91 JK 0001", phone:"919463003755", emergency:"917529045245", icon:"🏍️" },
+    "scooty": { name:"Activa 6G",           plate:"HR 26 DQ 5555", phone:"919463003755", emergency:"917529045245", icon:"🛵" }
+};
+
+let currentPhone = "", currentVehicleId = "", qrGenerated = false;
+
+function maskPhone(p) {
+    return `+${p.slice(0,2)} ••••• •••${p.slice(-3)}`;
+}
+
+function loadVehicle() {
+    const id = new URLSearchParams(window.location.search).get('id') || 'swift';
+    currentVehicleId = id;
+    const d = vehicleDB[id];
+    if (d) {
+        currentPhone = d.phone;
+        document.getElementById('v-name').textContent  = d.name;
+        document.getElementById('v-plate').textContent = d.plate;
+        document.getElementById('v-icon').textContent  = d.icon || '🚗';
+        document.getElementById('masked-num').textContent = maskPhone(d.phone);
+        const waMsg = `Hello! I'm near your vehicle (${d.name} — ${d.plate}). Please check it.`;
+        const waUrl = `https://wa.me/${d.phone}?text=${encodeURIComponent(waMsg)}`;
+        document.getElementById('btn-wa').onclick = (e) => { e.preventDefault(); openWA(waUrl); };
+        document.getElementById('btn-call').href   = `tel:+${d.phone}`;
+        document.getElementById('btn-family').href = `tel:+${d.emergency || d.phone}`;
+    } else {
+        document.getElementById('main-content').style.display = 'none';
+        document.getElementById('error-msg').style.display    = 'block';
+    }
+}
+
+function togglePanel(panelId, chevId) {
+    const p = document.getElementById(panelId);
+    const c = document.getElementById(chevId);
+    const open = p.classList.toggle('open');
+    if (c) c.textContent = open ? '∨' : '›';
+    if (panelId === 'msg-panel' && open) document.getElementById('msg-text').focus();
+}
+
+function openWA(url) {
+    window.open(url, '_blank');
+}
+
+function sendLocation() {
+    if (!currentPhone) return;
+    if (!navigator.geolocation) return alert("Geolocation not supported.");
+    navigator.geolocation.getCurrentPosition(pos => {
+        const { latitude: lat, longitude: lng } = pos.coords;
+        const msg = `📍 I'm near your vehicle. My location: https://www.google.com/maps?q=${lat},${lng}`;
+        openWA(`https://wa.me/${currentPhone}?text=${encodeURIComponent(msg)}`);
+    }, () => alert("⚠️ Please enable location access."));
+}
+
+function sendCustomMsg() {
+    const msg = document.getElementById('msg-text').value.trim();
+    if (!msg) return alert("Please type a message first.");
+    openWA(`https://wa.me/${currentPhone}?text=${encodeURIComponent(msg)}`);
+}
+
+function handlePhoto(e) {
+    const file = e.target.files[0]; if (!file) return;
+    const reader = new FileReader();
+    reader.onload = ev => {
+        document.getElementById('preview-img').src = ev.target.result;
+        document.getElementById('drop-zone').style.display = 'none';
+        document.getElementById('photo-preview').style.display = 'block';
+    };
+    reader.readAsDataURL(file);
+}
+
+function clearPhoto() {
+    document.getElementById('file-input').value = '';
+    document.getElementById('drop-zone').style.display    = 'block';
+    document.getElementById('photo-preview').style.display = 'none';
+}
+
+function sendPhotoWA() {
+    const msg = `📸 I've photographed the parking situation near your vehicle. Please check it.`;
+    openWA(`https://wa.me/${currentPhone}?text=${encodeURIComponent(msg)}`);
+}
+
+function generateQR() {
+    if (qrGenerated) return;
+    qrGenerated = true;
+    const canvas = document.getElementById('qr-canvas');
+    canvas.innerHTML = '';
+    const url = window.location.href.split('?')[0] + `?id=${currentVehicleId}`;
+    document.getElementById('qr-url-label').textContent = url;
+    new QRCode(canvas, {
+        text: url, width: 180, height: 180,
+        colorDark: "#1A0050", colorLight: "#ffffff",
+        correctLevel: QRCode.CorrectLevel.M
+    });
+}
+
+function toggleEmergency() {
+    const main = document.getElementById('main-content');
+    const ems  = document.getElementById('emergency-view');
+    if (ems.classList.contains('active')) {
+        ems.classList.remove('active');
+        main.style.display = 'block';
+    } else {
+        main.style.display = 'none';
+        ems.classList.add('active');
+    }
+}
+
+loadVehicle();
+</script>
+</body>
+</html>
